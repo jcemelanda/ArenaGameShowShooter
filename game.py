@@ -38,7 +38,7 @@ exploded_ship = {
     'rect': Rect(0, 0, 48, 48)
 }
 
-explosion_sound = pygame.mixer.Sound('boom.wav')
+explosion_sound = pygame.mixer.Sound('boom.ogg')
 pygame.display.set_caption('Asteroides')
 
 clock = pygame.time.Clock()
@@ -135,30 +135,26 @@ def new_game(config):
 
 def update_laser_cooldown():
     if not config['laser_cooldown']:
-        config['laser_cooldown'] = 2
+        config['laser_cooldown'] = 4
     else:
         config['laser_cooldown'] -= 1
 
-while True:
 
+def update_asteroids():
     if not config['ticks_to_asteroid']:
         config['ticks_to_asteroid'] = get_ticks_to_asteroid()
         asteroids.append(create_asteroid())
     else:
         config['ticks_to_asteroid'] -= 1
 
-    ship['speed'] = {
-        'x': 0,
-        'y': 0
-    }
 
+def check_exit():
     for event in pygame.event.get():
         if event.type == QUIT:
             exit()
 
-    pressed_keys = pygame.key.get_pressed()
-    pressed_mods = pygame.key.get_mods()
 
+def check_directions(pressed_keys):
     if pressed_keys[K_UP]:
         ship['speed']['y'] = -20
     elif pressed_keys[K_DOWN]:
@@ -169,28 +165,64 @@ while True:
     elif pressed_keys[K_RIGHT]:
         ship['speed']['x'] = 20
 
+
+def check_laser(pressed_keys):
     if pressed_keys[K_SPACE]:
         if not config['laser_cooldown']:
             lasers.append(create_laser())
 
-    screen.blit(background, (0, 0))
 
-    move_asteroids()
-    move_lasers()
+def check_restart(pressed_keys, pressed_mods):
+    if config['collided'] and pressed_mods and KMOD_CTRL:
+        if pressed_keys[K_r]:
+            new_game(config)
+
+
+def check_keyboard():
+    pressed_keys = pygame.key.get_pressed()
+    pressed_mods = pygame.key.get_mods()
+
+    check_directions(pressed_keys)
+
+    check_laser(pressed_keys)
+
+    check_restart(pressed_keys, pressed_mods)
+
+
+def draw():
+
+    screen.blit(background, (0, 0))
 
     for asteroid in asteroids:
         screen.blit(asteroid['surface'], asteroid['position'])
 
     if not config['collided']:
-        config['collided'] = ship_collided()
-        ship['position'][0] += ship['speed']['x']
-        ship['position'][1] += ship['speed']['y']
-
         screen.blit(ship['surface'], ship['position'])
 
         for laser in lasers:
             screen.blit(laser['surface'], laser['position'])
+    else:
+        if not config['explosion_played']:
+            screen.blit(ship['surface'], ship['position'])
+        elif config["collision_animation_counter"] == 3:
+            text = game_font.render('GAME OVER', 1, (255, 0, 0))
+            screen.blit(text, (335, 250))
+            text = game_font.render('CTRL+R TO RESTART', 1, (255, 0, 0))
+            screen.blit(text, (220, 300))
+        else:
+            exploded_ship['rect'].x = config["collision_animation_counter"] * 48
+            screen.blit(exploded_ship['surface'], exploded_ship['position'],
+                        exploded_ship['rect'])
+            config["collision_animation_counter"] += 1
 
+        pygame.display.update()
+
+
+def control_ship():
+    if not config['collided']:
+        config['collided'] = ship_collided()
+        ship['position'][0] += ship['speed']['x']
+        ship['position'][1] += ship['speed']['y']
     else:
         if not config['explosion_played']:
             config['explosion_played'] = True
@@ -198,23 +230,31 @@ while True:
             ship['position'][0] += ship['speed']['x']
             ship['position'][1] += ship['speed']['y']
 
-            screen.blit(ship['surface'], ship['position'])
-        elif config["collision_animation_counter"] == 3:
-            text = game_font.render('GAME OVER', 1, (255, 0, 0))
-            screen.blit(text, (335, 250))
-            text = game_font.render('CTRL+R TO RESTART', 1, (255, 0, 0))
-            screen.blit(text, (220, 300))
-            if pressed_mods and KMOD_CTRL:
-                if pressed_keys[K_r]:
-                    new_game(config)
-        else:
-            exploded_ship['rect'].x = config["collision_animation_counter"] * 48
+        elif config["collision_animation_counter"] < 3:
             exploded_ship['position'] = ship['position']
-            screen.blit(exploded_ship['surface'], exploded_ship['position'],
-                        exploded_ship['rect'])
-            config["collision_animation_counter"] += 1
 
-    pygame.display.update()
+
+while True:
+
+    update_asteroids()
+
+    ship['speed'] = {
+        'x': 0,
+        'y': 0
+    }
+
+    check_exit()
+
+    check_keyboard()
+
+    pressed_mods = pygame.key.get_mods()
+
+    move_asteroids()
+    move_lasers()
+
+    control_ship()
+
+    draw()
     time_passed = clock.tick(30)
 
     remove_used_asteroids()
