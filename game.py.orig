@@ -42,19 +42,13 @@ explosion_sound = pygame.mixer.Sound('boom.wav')
 pygame.display.set_caption('Asteroides')
 
 clock = pygame.time.Clock()
-
-
-def get_ticks_to_asteroid():
-    return randrange(30, 90)
+laser_cooldown = 0
 
 config = {
-    'explosion_played': False,
-    'collided': False,
-    'collision_animation_counter': 0,
-    'laser_cooldown': 0,
-    'ticks_to_asteroid': get_ticks_to_asteroid()
+    "explosion_played": False,
+    "collided": False,
+    "collision_animation_counter": 0
 }
-
 
 def create_asteroid():
     return {
@@ -73,6 +67,11 @@ def create_laser():
             'y': ship.get('speed').get('y')-32}
     }
 
+
+def get_ticks_to_asteroid():
+    return randrange(30, 90)
+
+ticks_to_asteroid = get_ticks_to_asteroid()
 
 asteroids = []
 
@@ -111,41 +110,41 @@ def ship_collided():
     return False
 
 
+<<<<<<< Updated upstream
 def new_game(config):
-    global asteroids
-    global lasers
-
-    ship['speed'] = {
+    ship["speed"] = {
         'x': 0,
         'y': 0
     }
-    exploded_ship['speed'] = {
+    exploded_ship["speed"] = {
         'x': 0,
         'y': 0
     },
     exploded_ship['rect'] = Rect(0, 0, 48, 48)
-    ship['position'] = [478, 500]
-    config['explosion_played'] = False
-    config['collided'] = False
-    config['laser_cooldown'] = 0
+    config["explosion_played"] = False
+    config["collided"] = False
     asteroids = []
-    lasers = []
-    config['collision_animation_counter'] = 0
+    config["collision_animation_counter"] = 0
 
-
+=======
 def update_laser_cooldown():
-    if not config['laser_cooldown']:
-        config['laser_cooldown'] = 2
+    global laser_cooldown
+    if not laser_cooldown:
+        laser_cooldown = 2
     else:
-        config['laser_cooldown'] -= 1
+        laser_cooldown -= 1
+
+collided = False
+collision_animation_counter = 0
+>>>>>>> Stashed changes
 
 while True:
 
-    if not config['ticks_to_asteroid']:
-        config['ticks_to_asteroid'] = get_ticks_to_asteroid()
+    if not ticks_to_asteroid:
+        ticks_to_asteroid = get_ticks_to_asteroid()
         asteroids.append(create_asteroid())
     else:
-        config['ticks_to_asteroid'] -= 1
+        ticks_to_asteroid -= 1
 
     ship['speed'] = {
         'x': 0,
@@ -170,7 +169,7 @@ while True:
         ship['speed']['x'] = 20
 
     if pressed_keys[K_SPACE]:
-        if not config['laser_cooldown']:
+        if not laser_cooldown:
             lasers.append(create_laser())
 
     screen.blit(background, (0, 0))
@@ -181,8 +180,8 @@ while True:
     for asteroid in asteroids:
         screen.blit(asteroid['surface'], asteroid['position'])
 
-    if not config['collided']:
-        config['collided'] = ship_collided()
+    if not config["collided"]:
+        config["collided"] = ship_collided()
         ship['position'][0] += ship['speed']['x']
         ship['position'][1] += ship['speed']['y']
 
@@ -192,8 +191,8 @@ while True:
             screen.blit(laser['surface'], laser['position'])
 
     else:
-        if not config['explosion_played']:
-            config['explosion_played'] = True
+        if not config["explosion_played"]:
+            config["explosion_played"] = True
             explosion_sound.play()
             ship['position'][0] += ship['speed']['x']
             ship['position'][1] += ship['speed']['y']
@@ -202,8 +201,6 @@ while True:
         elif config["collision_animation_counter"] == 3:
             text = game_font.render('GAME OVER', 1, (255, 0, 0))
             screen.blit(text, (335, 250))
-            text = game_font.render('CTRL+R TO RESTART', 1, (255, 0, 0))
-            screen.blit(text, (220, 300))
             if pressed_mods and KMOD_CTRL:
                 if pressed_keys[K_r]:
                     new_game(config)
