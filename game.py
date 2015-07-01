@@ -210,12 +210,13 @@ def draw():
             text = game_font.render('CTRL+R TO RESTART', 1, (255, 0, 0))
             screen.blit(text, (220, 300))
         else:
-            exploded_ship['rect'].x = config["collision_animation_counter"] * 48
+            exploded_ship['rect'].x = config['collision_animation_counter'] * 48
+            exploded_ship['position'] = ship['position']
             screen.blit(exploded_ship['surface'], exploded_ship['position'],
                         exploded_ship['rect'])
-            config["collision_animation_counter"] += 1
+            config['collision_animation_counter'] += 1
 
-        pygame.display.update()
+    pygame.display.update()
 
 
 def control_ship():
@@ -230,7 +231,7 @@ def control_ship():
             ship['position'][0] += ship['speed']['x']
             ship['position'][1] += ship['speed']['y']
 
-        elif config["collision_animation_counter"] < 3:
+        elif config['collision_animation_counter'] < 3:
             exploded_ship['position'] = ship['position']
 
 
