@@ -1,4 +1,6 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import pygame
 from pygame.locals import *
 from sys import exit
@@ -15,6 +17,7 @@ screen = pygame.display.set_mode((956, 560), 0, 32)
 
 background_filename = 'bg_big.png'
 background = pygame.image.load(background_filename).convert()
+
 
 ship = {
     'surface': pygame.image.load('ship.png').convert_alpha(),
@@ -36,11 +39,15 @@ exploded_ship = {
 }
 
 explosion_sound = pygame.mixer.Sound('boom.wav')
-explosion_played = False
 pygame.display.set_caption('Asteroides')
 
 clock = pygame.time.Clock()
 
+config = {
+    "explosion_played": False,
+    "collided": False,
+    "collision_animation_counter": 0
+}
 
 def create_asteroid():
     return {
@@ -83,8 +90,22 @@ def ship_collided():
             return True
     return False
 
-collided = False
-collision_animation_counter = 0
+
+def new_game(config):
+    ship["speed"] = {
+        'x': 0,
+        'y': 0
+    }
+    exploded_ship["speed"] = {
+        'x': 0,
+        'y': 0
+    },
+    exploded_ship['rect'] = Rect(0, 0, 48, 48)
+    config["explosion_played"] = False
+    config["collided"] = False
+    asteroids = []
+    config["collision_animation_counter"] = 0
+
 
 while True:
 
@@ -104,6 +125,7 @@ while True:
             exit()
 
     pressed_keys = pygame.key.get_pressed()
+    pressed_mods = pygame.key.get_mods()
 
     if pressed_keys[K_UP]:
         ship['speed']['y'] = -20
@@ -122,29 +144,32 @@ while True:
     for asteroid in asteroids:
         screen.blit(asteroid['surface'], asteroid['position'])
 
-    if not collided:
-        collided = ship_collided()
+    if not config["collided"]:
+        config["collided"] = ship_collided()
         ship['position'][0] += ship['speed']['x']
         ship['position'][1] += ship['speed']['y']
 
         screen.blit(ship['surface'], ship['position'])
     else:
-        if not explosion_played:
-            explosion_played = True
+        if not config["explosion_played"]:
+            config["explosion_played"] = True
             explosion_sound.play()
             ship['position'][0] += ship['speed']['x']
             ship['position'][1] += ship['speed']['y']
 
             screen.blit(ship['surface'], ship['position'])
-        elif collision_animation_counter == 3:
+        elif config["collision_animation_counter"] == 3:
             text = game_font.render('GAME OVER', 1, (255, 0, 0))
             screen.blit(text, (335, 250))
+            if pressed_mods and KMOD_CTRL:
+                if pressed_keys[K_r]:
+                    new_game(config)
         else:
-            exploded_ship['rect'].x = collision_animation_counter * 48
+            exploded_ship['rect'].x = config["collision_animation_counter"] * 48
             exploded_ship['position'] = ship['position']
             screen.blit(exploded_ship['surface'], exploded_ship['position'],
                         exploded_ship['rect'])
-            collision_animation_counter += 1
+            config["collision_animation_counter"] += 1
 
     pygame.display.update()
     time_passed = clock.tick(30)
