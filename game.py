@@ -268,28 +268,19 @@ def control_ship():
 
 
 while True:
-
-    update_asteroids()
-
     ship['speed'] = {
         'x': 0,
         'y': 0
     }
-
+    update_asteroids()
     check_exit()
-
     check_keyboard()
-
     pressed_mods = pygame.key.get_mods()
-
     move_asteroids()
     move_lasers()
-
     control_ship()
-
     draw()
     check_laser_collides()
     time_passed = clock.tick(30)
-
     remove_used_asteroids()
     update_laser_cooldown()
