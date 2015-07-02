@@ -39,6 +39,9 @@ exploded_ship = {
 }
 
 explosion_sound = pygame.mixer.Sound('boom.ogg')
+laser_sound = pygame.mixer.Sound('laser.ogg')
+asteroid_explosion_sound = pygame.mixer.Sound('boom.ogg')
+
 pygame.display.set_caption('Asteroides')
 
 clock = pygame.time.Clock()
@@ -65,11 +68,12 @@ def create_asteroid():
 
 
 def create_laser():
+    laser_sound.play()
     return {
         'surface': pygame.image.load('laser.png').convert_alpha(),
         'position': [ship.get('position')[0]+24, ship.get('position')[1]],
         'speed': {
-            'x': ship.get('speed').get('x'),
+            'x': 0,
             'y': ship.get('speed').get('y')-32}
     }
 
@@ -189,6 +193,16 @@ def check_keyboard():
     check_restart(pressed_keys, pressed_mods)
 
 
+def check_laser_collides():
+    laser_rects = [get_rect(l) for l in lasers]
+    for asteroid in asteroids:
+        collides = get_rect(asteroid).collidelist(laser_rects)
+        if collides > -1:
+            asteroid_explosion_sound.play()
+            asteroids.remove(asteroid)
+            lasers.pop(collides)
+
+
 def draw():
 
     screen.blit(background, (0, 0))
@@ -256,6 +270,7 @@ while True:
     control_ship()
 
     draw()
+    check_laser_collides()
     time_passed = clock.tick(30)
 
     remove_used_asteroids()
