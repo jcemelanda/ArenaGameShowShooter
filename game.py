@@ -12,6 +12,10 @@ pygame.mixer.pre_init(44100, 32, 2, 4096)
 
 font_name = pygame.font.get_default_font()
 game_font = pygame.font.SysFont(font_name, 72)
+score_font = pygame.font.SysFont(font_name, 48)
+
+score = 0
+max_score = 0
 
 screen = pygame.display.set_mode((956, 560), 0, 32)
 
@@ -118,6 +122,7 @@ def ship_collided():
 def new_game(config):
     global asteroids
     global lasers
+    global score
 
     ship['speed'] = {
         'x': 0,
@@ -132,6 +137,7 @@ def new_game(config):
     config['explosion_played'] = False
     config['collided'] = False
     config['laser_cooldown'] = 0
+    score = 0
     asteroids = []
     lasers = []
     config['collision_animation_counter'] = 0
@@ -194,6 +200,7 @@ def check_keyboard():
 
 
 def check_laser_collides():
+    global score
     laser_rects = [get_rect(l) for l in lasers]
     for asteroid in asteroids:
         collides = get_rect(asteroid).collidelist(laser_rects)
@@ -201,6 +208,7 @@ def check_laser_collides():
             asteroid_explosion_sound.play()
             asteroids.remove(asteroid)
             lasers.pop(collides)
+            score += 50
 
 
 def draw():
@@ -215,13 +223,17 @@ def draw():
 
         for laser in lasers:
             screen.blit(laser['surface'], laser['position'])
+
+        score_text = score_font.render('SCORE: {}'.format(score),
+                                       1, (255, 255, 255))
+        screen.blit(score_text, (15, 15))
     else:
         if not config['explosion_played']:
             screen.blit(ship['surface'], ship['position'])
         elif config["collision_animation_counter"] == 3:
             text = game_font.render('GAME OVER', 1, (255, 0, 0))
             screen.blit(text, (335, 250))
-            text = game_font.render('CTRL+R TO RESTART', 1, (255, 0, 0))
+            text = game_font.render('CTRL+R TO RESTART', 1, (255, 255, 0))
             screen.blit(text, (220, 300))
         else:
             exploded_ship['rect'].x = config['collision_animation_counter'] * 48
@@ -229,16 +241,22 @@ def draw():
             screen.blit(exploded_ship['surface'], exploded_ship['position'],
                         exploded_ship['rect'])
             config['collision_animation_counter'] += 1
+        score_text = score_font.render('MAX SCORE: {}'.format(max_score),
+                                       1, (255, 255, 255))
+        screen.blit(score_text, (15, 15))
 
     pygame.display.update()
 
 
 def control_ship():
+    global max_score
     if not config['collided']:
         config['collided'] = ship_collided()
         ship['position'][0] += ship['speed']['x']
         ship['position'][1] += ship['speed']['y']
     else:
+        if score > max_score:
+            max_score = score
         if not config['explosion_played']:
             config['explosion_played'] = True
             explosion_sound.play()
