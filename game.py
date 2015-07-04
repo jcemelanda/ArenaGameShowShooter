@@ -166,14 +166,28 @@ def check_exit():
 
 def check_directions(pressed_keys):
     if pressed_keys[K_UP]:
-        ship['speed']['y'] = -20
+        print ship['position'][1]
+        if ship['position'][1] < 0:
+            ship['position'][1] = 500
+        else:
+            ship['speed']['y'] = -20
     elif pressed_keys[K_DOWN]:
-        ship['speed']['y'] = 20
+        if ship['position'][1] > 500:
+            ship['position'][1] = 20
+        else:
+            ship['speed']['y'] = 20
 
     if pressed_keys[K_LEFT]:
-        ship['speed']['x'] = -20
+        print ship['position'][0]
+        if ship['position'][0] < 0:
+            ship['position'][0] = 900
+        else:
+            ship['speed']['x'] = -20
     elif pressed_keys[K_RIGHT]:
-        ship['speed']['x'] = 20
+        if ship['position'][0] == 900:
+            ship['position'][0] = 20
+        else:
+            ship['speed']['x'] = 20
 
 
 def check_laser(pressed_keys):
