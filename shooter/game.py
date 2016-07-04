@@ -19,12 +19,12 @@ max_score = 0
 
 screen = pygame.display.set_mode((956, 560), 0, 32)
 
-background_filename = 'bg_big.png'
+background_filename = './assets/bg_big.png'
 background = pygame.image.load(background_filename).convert()
 
 
 ship = {
-    'surface': pygame.image.load('ship.png').convert_alpha(),
+    'surface': pygame.image.load('./assets/ship.png').convert_alpha(),
     'position': [478, 500],
     'speed': {
         'x': 0,
@@ -33,7 +33,7 @@ ship = {
 }
 
 exploded_ship = {
-    'surface': pygame.image.load('ship_exploded.png').convert_alpha(),
+    'surface': pygame.image.load('./assets/ship_exploded.png').convert_alpha(),
     'position': [],
     'speed': {
         'x': 0,
@@ -42,9 +42,9 @@ exploded_ship = {
     'rect': Rect(0, 0, 48, 48)
 }
 
-explosion_sound = pygame.mixer.Sound('boom.ogg')
-laser_sound = pygame.mixer.Sound('laser.ogg')
-asteroid_explosion_sound = pygame.mixer.Sound('boom.ogg')
+explosion_sound = pygame.mixer.Sound('./assets/boom.ogg')
+laser_sound = pygame.mixer.Sound('./assets/laser.ogg')
+asteroid_explosion_sound = pygame.mixer.Sound('./assets/boom.ogg')
 
 pygame.display.set_caption('Asteroides')
 
@@ -65,7 +65,7 @@ config = {
 
 def create_asteroid():
     return {
-        'surface': pygame.image.load('asteroid.png').convert_alpha(),
+        'surface': pygame.image.load('./assets/asteroid.png').convert_alpha(),
         'position': [randrange(892), -64],
         'speed': randrange(8, 35)
     }
@@ -74,7 +74,7 @@ def create_asteroid():
 def create_laser():
     laser_sound.play()
     return {
-        'surface': pygame.image.load('laser.png').convert_alpha(),
+        'surface': pygame.image.load('./assets/laser.png').convert_alpha(),
         'position': [ship.get('position')[0]+24, ship.get('position')[1]],
         'speed': {
             'x': 0,
