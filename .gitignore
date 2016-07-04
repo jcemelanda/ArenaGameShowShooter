@@ -58,3 +58,11 @@ target/
 
 # PyCharm
 .idea/
+
+# Makefile stuff
+python.mk
+pyinstaller.mk
+.checkpoint/
+.downloads/
+.tools/
+venv/
